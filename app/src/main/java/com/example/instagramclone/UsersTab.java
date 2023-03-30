@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,8 @@ public class UsersTab extends Fragment implements AdapterView.OnItemClickListene
         listView.setOnItemClickListener(UsersTab.this);
         listView.setOnItemLongClickListener(UsersTab.this);
 
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeContainer);
+
         userProgressBar.setVisibility(View.VISIBLE);
         ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
         parseQuery.whereNotEqualTo("username", ParseUser.getCurrentUser().getUsername());
@@ -69,6 +72,40 @@ public class UsersTab extends Fragment implements AdapterView.OnItemClickListene
                 }
             }
         });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                try {
+                    ParseQuery<ParseUser> parseQuery1 = ParseUser.getQuery();
+                    parseQuery1.whereNotEqualTo("username", ParseUser.getCurrentUser().getUsername());
+                    parseQuery1.whereNotContainedIn("username", arrayList);
+                    parseQuery1.findInBackground(new FindCallback<ParseUser>() {
+                        @Override
+                        public void done(List<ParseUser> objects, ParseException e) {
+                            if(objects.size() > 0 && e == null){
+                                for (ParseUser user : objects){
+                                    arrayList.add(user.getUsername());
+                                }
+                                arrayAdapter.notifyDataSetChanged();
+                                if(swipeRefreshLayout.isRefreshing()){
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                            else {
+                                if(swipeRefreshLayout.isRefreshing()){
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                        }
+                    });
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return view;
     }
 
