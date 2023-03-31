@@ -139,6 +139,18 @@ public class UsersTab extends Fragment implements AdapterView.OnItemClickListene
                                         public void onClick() {
                                         prettyDialog.dismiss();
                                         }
+                                    })
+                            .addButton("CHAT",
+                                    libs.mjn.prettydialog.R.color.pdlg_color_white, // button text Color
+                                    libs.mjn.prettydialog.R.color.pdlg_color_green,  // button background color
+                                    new PrettyDialogCallback() {
+                                        @Override
+                                        public void onClick() {
+                                            prettyDialog.dismiss();
+                                            Intent intent = new Intent(getContext(), ChatActivity.class);
+                                            intent.putExtra("username", arrayList.get(position));
+                                            startActivity(intent);
+                                        }
                                     }).show();
                 }
             }
